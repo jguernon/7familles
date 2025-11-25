@@ -8,10 +8,10 @@ export const config = {
     imageModel: 'imagen-3.0-generate-002'
   },
 
-  // Chemins de stockage
+  // Chemins de stockage (utilise STORAGE_PATH pour Railway volumes)
   storage: {
-    familiesDir: './data/families',
-    imagesDir: './data/images'
+    familiesDir: process.env.STORAGE_PATH ? `${process.env.STORAGE_PATH}/families` : './data/families',
+    imagesDir: process.env.STORAGE_PATH ? `${process.env.STORAGE_PATH}/images` : './data/images'
   },
 
   // Configuration du jeu
