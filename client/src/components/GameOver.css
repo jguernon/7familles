@@ -1,0 +1,171 @@
+.game-over {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.game-over-container {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 450px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow-lg);
+}
+
+.result-banner {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  padding: 40px 30px;
+  text-align: center;
+  color: white;
+}
+
+.result-banner.winner {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  color: #333;
+}
+
+.trophy {
+  font-size: 60px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.result-banner h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.result-banner p {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.scoreboard {
+  padding: 25px;
+}
+
+.scoreboard h2 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.score-row.is-me {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid var(--primary);
+}
+
+.score-row.first {
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.2) 0%, rgba(225, 177, 44, 0.2) 100%);
+}
+
+.rank {
+  font-size: 20px;
+  margin-right: 12px;
+  min-width: 30px;
+}
+
+.score-player-name {
+  flex: 1;
+  font-weight: 600;
+  color: #333;
+}
+
+.me-tag {
+  font-size: 12px;
+  color: var(--primary);
+  margin-left: 5px;
+  font-weight: normal;
+}
+
+.score-value {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.completed-summary {
+  padding: 0 25px 25px;
+}
+
+.completed-summary h3 {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.player-families {
+  margin-bottom: 12px;
+}
+
+.player-families-name {
+  display: block;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.families-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.family-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-play-again {
+  width: calc(100% - 50px);
+  margin: 0 25px 25px;
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .result-banner {
+    padding: 30px 20px;
+  }
+
+  .trophy {
+    font-size: 50px;
+  }
+
+  .result-banner h1 {
+    font-size: 24px;
+  }
+
+  .scoreboard,
+  .completed-summary {
+    padding: 20px 15px;
+  }
+
+  .btn-play-again {
+    width: calc(100% - 30px);
+    margin: 0 15px 15px;
+  }
+}

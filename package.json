@@ -1,0 +1,17 @@
+{
+  "name": "7-familles-game",
+  "version": "1.0.0",
+  "description": "Jeu des 7 familles multijoueur en temps réel",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "dev": "npm run dev:server & npm run dev:client",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "postinstall": "npm run install:all"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

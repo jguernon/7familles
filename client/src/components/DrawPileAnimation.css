@@ -1,0 +1,197 @@
+.draw-animation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.draw-animation-overlay.done {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.draw-pile-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Pile de cartes */
+.draw-pile-stack {
+  position: relative;
+  width: 180px;
+  height: 250px;
+}
+
+.pile-card {
+  position: absolute;
+  width: 180px;
+  height: 250px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  background: url('/cardback.png') center center / cover;
+  overflow: hidden;
+}
+
+/* Carte tirée */
+.drawn-card {
+  position: absolute;
+  width: 180px;
+  height: 250px;
+  perspective: 1000px;
+  z-index: 10;
+}
+
+.drawn-card.drawing {
+  animation: drawFromPile 0.6s ease-out forwards;
+}
+
+.drawn-card.flipping {
+  animation: drawFromPile 0.6s ease-out forwards;
+}
+
+.drawn-card.flipping .card-inner {
+  animation: flipCard 0.8s ease-in-out forwards;
+}
+
+.drawn-card.moving {
+  animation: moveToHand 0.8s ease-in-out forwards;
+}
+
+.drawn-card.moving .card-inner {
+  transform: rotateY(180deg);
+}
+
+@keyframes drawFromPile {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-50px) scale(1.1);
+  }
+}
+
+@keyframes flipCard {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+@keyframes moveToHand {
+  0% {
+    transform: translateY(-50px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+}
+
+/* Dos de la carte */
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.card-back-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Face de la carte */
+.card-front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-front img {
+  width: 100%;
+  height: 75%;
+  object-fit: cover;
+}
+
+.card-front-emoji {
+  height: 75%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+}
+
+.card-front-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  gap: 4px;
+}
+
+.card-member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card-family-name {
+  font-size: 11px;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .draw-pile-stack,
+  .pile-card,
+  .drawn-card {
+    width: 140px;
+    height: 195px;
+  }
+}

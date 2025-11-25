@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build
+client/dist/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Generated images (can be regenerated)
+server/data/images/*.png
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

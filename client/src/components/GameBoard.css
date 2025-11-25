@@ -1,0 +1,336 @@
+.game-board {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+}
+
+/* Header */
+.game-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.game-info {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.draw-pile {
+  background: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.families-count {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.game-code {
+  color: var(--primary);
+  font-weight: 600;
+  margin-top:4px;
+}
+
+.turn-indicator {
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #f0f0f0;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.turn-indicator.my-turn {
+  background: var(--bg-gradient);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 1000;
+  max-width: 90%;
+  text-align: center;
+}
+
+.action-feedback {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+/* Autres joueurs */
+.other-players {
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.other-players h3 {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.players-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.opponent {
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 12px 15px;
+  min-width: 120px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.opponent.active {
+  border: 3px solid var(--warning);
+  box-shadow: 0 0 15px rgba(237, 137, 54, 0.4);
+}
+
+.opponent.disconnected {
+  opacity: 0.5;
+}
+
+.opponent-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0 auto 8px;
+}
+
+.opponent-name {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.opponent-cards {
+  display: block;
+  font-size: 12px;
+  color: #666;
+}
+
+.opponent-families {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.completed-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Mes familles complétées */
+.my-completed-families {
+  padding: 15px 20px;
+}
+
+.my-completed-families h3 {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.completed-families-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.completed-family {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border-left: 4px solid;
+}
+
+.family-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Ma main */
+.my-hand {
+  flex: 1;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px 24px 0 0;
+  margin-top: auto;
+}
+
+.my-hand h3 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.hand-hint {
+  font-size: 13px;
+  color: var(--primary);
+  margin-bottom: 15px;
+}
+
+.hand-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.family-group {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.family-label {
+  padding: 8px 15px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Bouton Demander avec dimensions de carte */
+.ask-card-btn {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 100%;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 3px dashed var(--card-color);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ask-card-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: var(--card-color);
+  border-style: solid;
+}
+
+.ask-card-btn:hover .ask-icon,
+.ask-card-btn:hover .ask-text {
+  color: white;
+}
+
+.ask-card-btn:active {
+  transform: scale(0.95);
+}
+
+.ask-icon {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--card-color);
+  transition: color 0.2s ease;
+}
+
+.ask-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--card-color);
+  transition: color 0.2s ease;
+}
+
+.family-cards {
+  display: block;
+  gap: 10px;
+  padding: 15px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-cards {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+@media (max-width: 480px) {
+  .game-header {
+    padding: 10px 15px;
+  }
+
+  .other-players,
+  .my-hand {
+    padding: 15px;
+  }
+
+  .opponent {
+    min-width: 100px;
+    padding: 10px;
+  }
+
+  .family-cards {
+    padding: 10px;
+  }
+}
