@@ -39,7 +39,7 @@ function HomeScreen({ onCreateGame, onJoinGame, error, setError }) {
     <div className="home-screen">
       <div className="home-container fade-in">
         <div className="logo">
-          <span className="logo-number">7</span>
+          <span className="logo-number">Les</span>
           <span className="logo-text">Familles</span>
         </div>
 

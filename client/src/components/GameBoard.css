@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: 20px;
+  padding-bottom: 70px; /* Espace pour la barre de tour fixe */
 }
 
 /* Header */
@@ -45,19 +45,68 @@
   margin-top:4px;
 }
 
-.turn-indicator {
+/* Barre de tour fixe en bas */
+.turn-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  text-align: center;
   font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: #f0f0f0;
-  color: #666;
-  transition: all 0.3s ease;
+  font-size: 16px;
+  z-index: 200;
+  transition: all 0.4s ease;
+  background: #6b7280;
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
 }
 
-.turn-indicator.my-turn {
-  background: var(--bg-gradient);
+.turn-bar.my-turn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
   color: white;
-  animation: pulse 2s infinite;
+  box-shadow: 0 -4px 20px rgba(139, 92, 246, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: turnBarGlow 2s ease-in-out infinite;
+}
+
+.turn-bar-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.turn-bar.my-turn .turn-bar-content::before,
+.turn-bar.my-turn .turn-bar-content::after {
+  content: '✨';
+  animation: sparkle 1s ease-in-out infinite;
+}
+
+.turn-bar.my-turn .turn-bar-content::after {
+  animation-delay: 0.5s;
+}
+
+@keyframes turnBarGlow {
+  0%, 100% {
+    box-shadow: 0 -4px 20px rgba(139, 92, 246, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 -4px 30px rgba(168, 85, 247, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
 /* Notifications */
@@ -78,7 +127,7 @@
 
 .action-feedback {
   position: fixed;
-  bottom: 100px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--primary);

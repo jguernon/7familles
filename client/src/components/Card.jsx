@@ -10,8 +10,8 @@ function Card({ card, onClick, disabled, small, highlighted }) {
   // Charger l'image depuis le serveur si pas d'image embarquée
   useEffect(() => {
     if (!card.image && !imageError) {
-      // Essayer de charger l'image depuis le serveur
-      const serverImageUrl = `${SERVER_URL}/images/${card.id}.png`;
+      // Utiliser l'API qui génère les images à la demande
+      const serverImageUrl = `${SERVER_URL}/api/card-image/${card.id}`;
 
       // Vérifier si l'image existe
       const img = new Image();

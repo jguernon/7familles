@@ -3,6 +3,7 @@ import { socket } from '../socket';
 import Card from './Card';
 import AskCardModal from './AskCardModal';
 import DrawPileAnimation from './DrawPileAnimation';
+import CardTransferAnimation from './CardTransferAnimation';
 import './GameBoard.css';
 
 function GameBoard({ gameState, playerName, onAskCard }) {
@@ -11,12 +12,13 @@ function GameBoard({ gameState, playerName, onAskCard }) {
   const [actionFeedback, setActionFeedback] = useState(null);
   const [drawnCard, setDrawnCard] = useState(null);
   const [highlightedCardId, setHighlightedCardId] = useState(null);
+  const [cardTransfer, setCardTransfer] = useState(null);
 
   const myId = socket.id;
   const isMyTurn = gameState.isMyTurn;
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
 
-  // Affiche les notifications pour les actions
+  // Affiche les notifications et animations pour les actions des autres joueurs
   useEffect(() => {
     if (gameState.lastAction) {
       const action = gameState.lastAction;
@@ -27,14 +29,24 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         if (action.familyCompleted) {
           message += ` Famille ${action.familyCompleted} complétée!`;
         }
+
+        // Animation de transfert pour les autres joueurs (pas celui qui a fait l'action)
+        if (action.askerId !== myId && action.card) {
+          setCardTransfer({
+            card: action.card,
+            fromPlayerId: action.targetId,
+            toPlayerId: action.askerId,
+            toHand: action.askerId === myId
+          });
+        }
       } else if (action.type === 'fail') {
         if (action.drewRequestedCard) {
-          message = `${action.asker} a pioché le ${action.member} de la famille ${action.family}!`;
+          message = `${action.asker} a pigé le ${action.member} de la famille ${action.family}!`;
           if (action.familyCompleted) {
             message += ` Famille ${action.familyCompleted} complétée!`;
           }
         } else {
-          message = `${action.target} n'avait pas le ${action.member}. ${action.asker} a pioché.`;
+          message = `${action.target} n'avait pas le ${action.member}. ${action.asker} a pigé.`;
         }
       }
 
@@ -48,7 +60,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         setTimeout(() => setNotification(null), 5000);
       }
     }
-  }, [gameState.lastAction]);
+  }, [gameState.lastAction, myId]);
 
   const [selectedFamily, setSelectedFamily] = useState(null);
 
@@ -75,20 +87,28 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       if (response.success) {
         if (response.gotCard) {
           if (response.drewRequestedCard) {
-            // On a pioché la carte demandée - animation
+            // On a pigé la carte demandée - animation de pige
             if (response.drawnCard) {
               setDrawnCard(response.drawnCard);
             }
-            setActionFeedback('Vous avez pioché la carte demandée! Vous rejouez.');
+            setActionFeedback('Vous avez pigé la carte demandée! Vous rejouez.');
+          } else if (response.stolenCard && response.fromPlayerId) {
+            // On a volé la carte à un adversaire - animation de transfert
+            setCardTransfer({
+              card: response.stolenCard,
+              fromPlayerId: response.fromPlayerId,
+              toHand: true // vers notre main
+            });
+            setActionFeedback('Vous avez obtenu la carte! Vous rejouez.');
           } else {
             setActionFeedback('Vous avez obtenu la carte! Vous rejouez.');
           }
         } else {
-          // On a pioché une autre carte - animation
+          // On a pigé une autre carte - animation de pige
           if (response.drawnCard) {
             setDrawnCard(response.drawnCard);
           }
-          setActionFeedback('Carte non trouvée. Vous avez pioché.');
+          setActionFeedback('Carte non trouvée. Vous avez pigé.');
         }
       } else {
         setActionFeedback(response.error);
@@ -112,12 +132,9 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       {/* Header avec infos de partie */}
       <header className="game-header">
         <div className="game-info">
-          <span className="draw-pile">Pioche: {gameState.drawPileCount}</span>
+          <span className="draw-pile">Pige: {gameState.drawPileCount}</span>
           <span className="families-count">Familles: {gameState.families?.length || 0}</span>
           <span className="game-code">#{gameState.code}</span>
-        </div>
-        <div className={`turn-indicator ${isMyTurn ? 'my-turn' : ''}`}>
-          {isMyTurn ? 'Votre tour!' : `Tour de ${currentPlayer?.name || '...'}`}
         </div>
       </header>
 
@@ -144,6 +161,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
             .map(player => (
               <div
                 key={player.id}
+                data-player-id={player.id}
                 className={`opponent ${player.id === currentPlayer?.id ? 'active' : ''} ${player.disconnected ? 'disconnected' : ''}`}
               >
                 <div className="opponent-avatar">
@@ -258,6 +276,28 @@ function GameBoard({ gameState, playerName, onAskCard }) {
           }}
         />
       )}
+
+      {/* Animation de transfert de carte */}
+      {cardTransfer && (
+        <CardTransferAnimation
+          transfer={cardTransfer}
+          onComplete={() => {
+            // Si la carte va vers notre main, la highlight
+            if (cardTransfer.toHand && cardTransfer.card) {
+              setHighlightedCardId(cardTransfer.card.id);
+              setTimeout(() => setHighlightedCardId(null), 3000);
+            }
+            setCardTransfer(null);
+          }}
+        />
+      )}
+
+      {/* Barre de tour fixe en bas */}
+      <div className={`turn-bar ${isMyTurn ? 'my-turn' : ''}`}>
+        <div className="turn-bar-content">
+          {isMyTurn ? 'Votre tour!' : `Tour de ${currentPlayer?.name || '...'}`}
+        </div>
+      </div>
     </div>
   );
 }

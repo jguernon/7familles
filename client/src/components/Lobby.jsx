@@ -105,7 +105,7 @@ function Lobby({ gameState, playerName, isHost, onStartGame, onSetReady, error }
             <li>Demandez une carte à un autre joueur</li>
             <li>Vous devez posséder au moins une carte de la famille demandée</li>
             <li>Si le joueur a la carte, il vous la donne et vous rejouez</li>
-            <li>Sinon, vous piochez une carte</li>
+            <li>Sinon, vous pigez une carte</li>
             <li>Complétez des familles (6 cartes) pour marquer des points</li>
             <li>Le joueur avec le plus de familles gagne!</li>
           </ul>

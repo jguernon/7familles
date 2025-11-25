@@ -15,8 +15,8 @@ function DrawPileAnimation({ drawnCard, onComplete }) {
       if (drawnCard.image) {
         setImageUrl(drawnCard.image);
       } else {
-        // Charger depuis le serveur
-        setImageUrl(`${SERVER_URL}/images/${drawnCard.id}.png`);
+        // Utiliser l'API qui génère les images à la demande
+        setImageUrl(`${SERVER_URL}/api/card-image/${drawnCard.id}`);
       }
     }
   }, [drawnCard]);

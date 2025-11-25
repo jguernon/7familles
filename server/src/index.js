@@ -368,9 +368,12 @@ io.on('connection', (socket) => {
       game.lastAction = {
         type: 'success',
         asker: askerName,
+        askerId: socket.id,
         target: targetName,
+        targetId: targetPlayerId,
         family: family.name,
-        member: member.name
+        member: member.name,
+        card: card // La carte volée pour l'animation
       };
 
       // Vérifie si une famille est complétée
@@ -390,8 +393,8 @@ io.on('connection', (socket) => {
         game.lastAction.familyCompleted = family.name;
       }
 
-      // Le joueur rejoue
-      callback({ success: true, gotCard: true });
+      // Le joueur rejoue - inclure la carte pour l'animation
+      callback({ success: true, gotCard: true, stolenCard: card, fromPlayerId: targetPlayerId });
 
     } else {
       // Le joueur cible n'a pas la carte, on pioche
@@ -596,22 +599,84 @@ app.post('/api/generate-card', async (req, res) => {
   }
 });
 
+// Cache mémoire pour les images générées (persiste pendant l'exécution)
+const imageCache = new Map();
+
 // Route pour obtenir l'image d'une carte (charge depuis le cache ou génère)
 app.get('/api/card-image/:cardId', async (req, res) => {
   try {
     const { cardId } = req.params;
-    const imagePath = path.resolve(__dirname, '../data/images', `${cardId}.png`);
 
-    // Vérifier si l'image existe
+    // 1. Vérifier le cache mémoire
+    if (imageCache.has(cardId)) {
+      const base64 = imageCache.get(cardId);
+      const imageBuffer = Buffer.from(base64, 'base64');
+      res.set('Content-Type', 'image/png');
+      res.set('Cache-Control', 'public, max-age=31536000'); // Cache 1 an
+      return res.send(imageBuffer);
+    }
+
+    // 2. Vérifier le fichier sur disque
+    const imagePath = path.resolve(__dirname, '../data/images', `${cardId}.png`);
     try {
       await fs.access(imagePath);
-      // Envoyer l'image existante
-      res.sendFile(imagePath);
+      const imageBuffer = await fs.readFile(imagePath);
+      // Ajouter au cache mémoire
+      imageCache.set(cardId, imageBuffer.toString('base64'));
+      res.set('Content-Type', 'image/png');
+      res.set('Cache-Control', 'public, max-age=31536000');
+      return res.send(imageBuffer);
     } catch {
-      // Image n'existe pas
-      res.status(404).json({ success: false, error: 'Image non générée' });
+      // Fichier n'existe pas, continuer
     }
+
+    // 3. Trouver les infos de la carte dans une partie active
+    let cardInfo = null;
+    for (const [, game] of games) {
+      // Chercher dans le deck
+      const allCards = [...game.drawPile];
+      for (const hand of Object.values(game.hands)) {
+        allCards.push(...hand);
+      }
+      for (const playerFamilies of Object.values(game.completedFamilies)) {
+        for (const family of playerFamilies) {
+          allCards.push(...family.cards);
+        }
+      }
+
+      const card = allCards.find(c => c.id === cardId);
+      if (card) {
+        cardInfo = card;
+        break;
+      }
+    }
+
+    // 4. Si on a les infos, générer l'image
+    if (cardInfo) {
+      const { generateSingleCard } = await import('./imageGenerator.js');
+      const generatedCard = await generateSingleCard(
+        cardInfo.familyId,
+        cardInfo.familyName,
+        cardInfo.familyTheme || cardInfo.familyName,
+        cardInfo.familyColor,
+        cardInfo.memberId
+      );
+
+      if (generatedCard && generatedCard.image) {
+        // Extraire le base64 du data URL
+        const base64 = generatedCard.image.replace(/^data:image\/\w+;base64,/, '');
+        imageCache.set(cardId, base64);
+        const imageBuffer = Buffer.from(base64, 'base64');
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=31536000');
+        return res.send(imageBuffer);
+      }
+    }
+
+    // 5. Image non trouvée/non générable
+    res.status(404).json({ success: false, error: 'Image non disponible' });
   } catch (error) {
+    console.error('Erreur card-image:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
