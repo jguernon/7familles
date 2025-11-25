@@ -34,7 +34,6 @@
 
 .card.disabled {
   cursor: default;
-  opacity: 0.7;
 }
 
 .card.small {
