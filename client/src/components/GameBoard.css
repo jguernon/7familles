@@ -229,6 +229,7 @@
 
 .hand-hint {
   font-size: 13px;
+  animation-direction: left;
   color: var(--primary);
   margin-bottom: 15px;
 }
