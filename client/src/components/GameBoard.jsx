@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { socket } from '../socket';
 import Card from './Card';
 import AskCardModal from './AskCardModal';
 import DrawPileAnimation from './DrawPileAnimation';
 import CardTransferAnimation from './CardTransferAnimation';
+import FamilyCompleteAnimation from './FamilyCompleteAnimation';
+import useSounds from '../hooks/useSounds';
 import './GameBoard.css';
 
 function GameBoard({ gameState, playerName, onAskCard }) {
@@ -13,10 +15,43 @@ function GameBoard({ gameState, playerName, onAskCard }) {
   const [drawnCard, setDrawnCard] = useState(null);
   const [highlightedCardId, setHighlightedCardId] = useState(null);
   const [cardTransfer, setCardTransfer] = useState(null);
+  const [familyComplete, setFamilyComplete] = useState(null);
+
+  const sounds = useSounds();
+  const prevCompletedFamiliesRef = useRef(gameState.completedFamilies);
 
   const myId = socket.id;
   const isMyTurn = gameState.isMyTurn;
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+  // Gérer le son d'attente quand ce n'est pas notre tour
+  useEffect(() => {
+    if (!isMyTurn) {
+      sounds.startWaiting();
+    } else {
+      sounds.stopWaiting();
+    }
+    return () => sounds.stopWaiting();
+  }, [isMyTurn, sounds]);
+
+  // Détecter quand une nouvelle famille est complétée (par moi)
+  useEffect(() => {
+    const myCompletedFamilies = gameState.completedFamilies[myId] || [];
+    const prevMyCompletedFamilies = prevCompletedFamiliesRef.current[myId] || [];
+
+    if (myCompletedFamilies.length > prevMyCompletedFamilies.length) {
+      // Une nouvelle famille a été complétée par moi
+      const newFamily = myCompletedFamilies[myCompletedFamilies.length - 1];
+      sounds.playWin();
+      setFamilyComplete({
+        familyEmoji: newFamily.cards[0]?.familyEmoji,
+        familyName: newFamily.familyName,
+        familyColor: newFamily.cards[0]?.familyColor
+      });
+    }
+
+    prevCompletedFamiliesRef.current = gameState.completedFamilies;
+  }, [gameState.completedFamilies, myId, sounds]);
 
   // Affiche les notifications et animations pour les actions des autres joueurs
   useEffect(() => {
@@ -28,6 +63,11 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         message = `${action.asker} a pris le ${action.member} de la famille ${action.family} à ${action.target}!`;
         if (action.familyCompleted) {
           message += ` Famille ${action.familyCompleted} complétée!`;
+        }
+
+        // Son stolen si on se fait voler une carte
+        if (action.targetId === myId) {
+          sounds.playStolen();
         }
 
         // Animation de transfert pour les autres joueurs (pas celui qui a fait l'action)
@@ -60,7 +100,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         setTimeout(() => setNotification(null), 5000);
       }
     }
-  }, [gameState.lastAction, myId]);
+  }, [gameState.lastAction, myId, sounds]);
 
   const [selectedFamily, setSelectedFamily] = useState(null);
 
@@ -88,12 +128,14 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         if (response.gotCard) {
           if (response.drewRequestedCard) {
             // On a pigé la carte demandée - animation de pige
+            sounds.playPige();
             if (response.drawnCard) {
               setDrawnCard(response.drawnCard);
             }
             setActionFeedback('Vous avez pigé la carte demandée! Vous rejouez.');
           } else if (response.stolenCard && response.fromPlayerId) {
             // On a volé la carte à un adversaire - animation de transfert
+            sounds.playGotCard();
             setCardTransfer({
               card: response.stolenCard,
               fromPlayerId: response.fromPlayerId,
@@ -101,10 +143,12 @@ function GameBoard({ gameState, playerName, onAskCard }) {
             });
             setActionFeedback('Vous avez obtenu la carte! Vous rejouez.');
           } else {
+            sounds.playGotCard();
             setActionFeedback('Vous avez obtenu la carte! Vous rejouez.');
           }
         } else {
           // On a pigé une autre carte - animation de pige
+          sounds.playPige();
           if (response.drawnCard) {
             setDrawnCard(response.drawnCard);
           }
@@ -290,6 +334,16 @@ function GameBoard({ gameState, playerName, onAskCard }) {
             }
             setCardTransfer(null);
           }}
+        />
+      )}
+
+      {/* Animation de famille complète */}
+      {familyComplete && (
+        <FamilyCompleteAnimation
+          familyEmoji={familyComplete.familyEmoji}
+          familyName={familyComplete.familyName}
+          familyColor={familyComplete.familyColor}
+          onComplete={() => setFamilyComplete(null)}
         />
       )}
 

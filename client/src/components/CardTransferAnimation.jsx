@@ -1,10 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './CardTransferAnimation.css';
+
+// Générer les nuages d'explosion
+function generateClouds() {
+  const clouds = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * 360;
+    const distance = 40 + Math.random() * 30;
+    clouds.push({
+      id: i,
+      emoji: '💨',
+      angle,
+      distance,
+      delay: Math.random() * 0.2,
+      scale: 0.8 + Math.random() * 0.4,
+    });
+  }
+  return clouds;
+}
 
 function CardTransferAnimation({ transfer, onComplete }) {
   const [phase, setPhase] = useState('idle');
   const [positions, setPositions] = useState({ start: null, end: null });
   const cardRef = useRef(null);
+  const clouds = useMemo(() => generateClouds(), []);
 
   // Calculer les positions et démarrer l'animation
   useEffect(() => {
@@ -20,6 +39,9 @@ function CardTransferAnimation({ transfer, onComplete }) {
       const fromRect = fromElement.getBoundingClientRect();
       const toRect = toElement.getBoundingClientRect();
 
+      // Scroll vers l'élément source pour voir l'animation
+      fromElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
       setPositions({
         start: {
           x: fromRect.left + fromRect.width / 2,
@@ -32,15 +54,20 @@ function CardTransferAnimation({ transfer, onComplete }) {
       });
 
       // Démarrer l'animation
-      setPhase('lifting');
+      setPhase('exploding'); // Nouvelle phase: nuages qui explosent
 
       const timers = [
-        setTimeout(() => setPhase('flying'), 500),
-        setTimeout(() => setPhase('landing'), 1200),
+        setTimeout(() => setPhase('lifting'), 400),
+        setTimeout(() => setPhase('flying'), 900),
+        setTimeout(() => {
+          // Scroll vers la destination
+          toElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 1000),
+        setTimeout(() => setPhase('landing'), 1600),
         setTimeout(() => {
           setPhase('done');
           onComplete();
-        }, 1800)
+        }, 2200)
       ];
 
       return () => timers.forEach(t => clearTimeout(t));
@@ -65,6 +92,32 @@ function CardTransferAnimation({ transfer, onComplete }) {
 
   return (
     <div className={`card-transfer-overlay ${phase}`}>
+      {/* Nuages d'explosion à la position de départ */}
+      {(phase === 'exploding' || phase === 'lifting') && (
+        <div
+          className="explosion-clouds"
+          style={{
+            left: positions.start.x,
+            top: positions.start.y,
+          }}
+        >
+          {clouds.map((cloud) => (
+            <div
+              key={cloud.id}
+              className="cloud-emoji"
+              style={{
+                '--angle': `${cloud.angle}deg`,
+                '--distance': `${cloud.distance}px`,
+                '--delay': `${cloud.delay}s`,
+                '--scale': cloud.scale,
+              }}
+            >
+              {cloud.emoji}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div
         ref={cardRef}
         className={`transfer-card ${phase}`}

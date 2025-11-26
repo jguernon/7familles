@@ -11,10 +11,19 @@ function DrawPileAnimation({ drawnCard, onComplete, families = [] }) {
       // Démarrer l'animation
       setPhase('drawing');
 
+      // Scroll vers ma main à la fin de l'animation
+      const myHand = document.querySelector('.my-hand');
+
       // Séquence d'animation
       const timers = [
         setTimeout(() => setPhase('flipping'), 600),
-        setTimeout(() => setPhase('moving'), 1400),
+        setTimeout(() => {
+          setPhase('moving');
+          // Scroll vers ma main quand la carte y va
+          if (myHand) {
+            myHand.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 1400),
         setTimeout(() => {
           setPhase('done');
           stableOnComplete();

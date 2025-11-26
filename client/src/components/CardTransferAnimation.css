@@ -72,6 +72,64 @@
   border-radius: 8px;
 }
 
+/* Nuages d'explosion */
+.explosion-clouds {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1600;
+}
+
+.cloud-emoji {
+  position: absolute;
+  font-size: 30px;
+  animation: explodeCloud 0.6s ease-out forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+  transform-origin: center center;
+}
+
+@keyframes explodeCloud {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(0) scale(0.3);
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(var(--angle)) translateX(var(--distance)) scale(var(--scale));
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(calc(var(--distance) * 1.5)) scale(0.2);
+  }
+}
+
+/* Phase: Exploding - Carte apparaît avec nuages */
+.transfer-card.exploding {
+  left: var(--start-x);
+  top: var(--start-y);
+  transform: translate(-50%, -50%) scale(0);
+  animation: cardAppear 0.4s ease-out forwards;
+}
+
+@keyframes cardAppear {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
 /* Phase: Lifting - La carte se soulève avec ombrage */
 .transfer-card.lifting {
   left: var(--start-x);
