@@ -198,26 +198,29 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       url: shareUrl
     };
 
-    try {
-      if (navigator.share) {
+    // Vérifier si Web Share API est disponible et peut partager ces données
+    const canUseShare = navigator.share && navigator.canShare && navigator.canShare(shareData);
+
+    if (canUseShare) {
+      try {
         await navigator.share(shareData);
-      } else {
-        // Fallback: copier le lien dans le presse-papier
-        await navigator.clipboard.writeText(shareUrl);
-        setActionFeedback('Lien copié !');
-        setTimeout(() => setActionFeedback(null), 2000);
+        return; // Partage réussi
+      } catch (err) {
+        // Si l'utilisateur a annulé, ne rien faire
+        if (err.name === 'AbortError') return;
+        // Sinon, fallback au clipboard
       }
-    } catch (err) {
-      // L'utilisateur a annulé le partage ou erreur
-      if (err.name !== 'AbortError') {
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          setActionFeedback('Lien copié !');
-          setTimeout(() => setActionFeedback(null), 2000);
-        } catch {
-          console.error('Erreur de partage:', err);
-        }
-      }
+    }
+
+    // Fallback: copier le lien dans le presse-papier
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setActionFeedback('Lien copié !');
+      setTimeout(() => setActionFeedback(null), 2000);
+    } catch {
+      // Dernier recours si clipboard ne fonctionne pas
+      setActionFeedback(`Code: ${gameState.code}`);
+      setTimeout(() => setActionFeedback(null), 3000);
     }
   };
 
