@@ -39,8 +39,9 @@ function CardTransferAnimation({ transfer, onComplete }) {
       const fromRect = fromElement.getBoundingClientRect();
       const toRect = toElement.getBoundingClientRect();
 
-      // Scroll vers l'élément source pour voir l'animation
-      fromElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Calculer les positions au centre de l'écran pour éviter les bugs de scroll
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
 
       setPositions({
         start: {
@@ -53,21 +54,17 @@ function CardTransferAnimation({ transfer, onComplete }) {
         }
       });
 
-      // Démarrer l'animation
-      setPhase('exploding'); // Nouvelle phase: nuages qui explosent
+      // Démarrer l'animation avec les nuages
+      setPhase('exploding');
 
       const timers = [
-        setTimeout(() => setPhase('lifting'), 400),
-        setTimeout(() => setPhase('flying'), 900),
-        setTimeout(() => {
-          // Scroll vers la destination
-          toElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 1000),
-        setTimeout(() => setPhase('landing'), 1600),
+        setTimeout(() => setPhase('lifting'), 500),
+        setTimeout(() => setPhase('flying'), 1000),
+        setTimeout(() => setPhase('landing'), 1700),
         setTimeout(() => {
           setPhase('done');
           onComplete();
-        }, 2200)
+        }, 2300)
       ];
 
       return () => timers.forEach(t => clearTimeout(t));
