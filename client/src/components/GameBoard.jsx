@@ -19,6 +19,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
 
   const sounds = useSounds();
   const prevCompletedFamiliesRef = useRef(gameState.completedFamilies);
+  const lastProcessedActionRef = useRef(null);
 
   const myId = socket.id;
   const isMyTurn = gameState.isMyTurn;
@@ -57,6 +58,14 @@ function GameBoard({ gameState, playerName, onAskCard }) {
   useEffect(() => {
     if (gameState.lastAction) {
       const action = gameState.lastAction;
+
+      // Éviter de traiter la même action plusieurs fois
+      const actionId = `${action.type}-${action.asker}-${action.target}-${action.family}-${action.member}-${action.timestamp || Date.now()}`;
+      if (lastProcessedActionRef.current === actionId) {
+        return;
+      }
+      lastProcessedActionRef.current = actionId;
+
       let message = '';
 
       if (action.type === 'success') {
@@ -300,8 +309,8 @@ function GameBoard({ gameState, playerName, onAskCard }) {
             <p className="no-cards">Vous n'avez plus de cartes</p>
           )}
 
-          {/* Bouton pour demander une autre famille */}
-          {isMyTurn && (
+          {/* Bouton pour demander une autre famille - temporairement désactivé */}
+          {/* {isMyTurn && (
             <button
               className="ask-any-family-btn"
               onClick={handleAskAnyFamily}
@@ -309,7 +318,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
               <span className="ask-any-icon">🎴</span>
               <span className="ask-any-text">Demander une autre famille</span>
             </button>
-          )}
+          )} */}
         </div>
       </section>
 

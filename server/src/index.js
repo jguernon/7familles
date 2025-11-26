@@ -279,7 +279,8 @@ io.on('connection', (socket) => {
         targetId: targetPlayerId,
         family: family.name,
         member: member.name,
-        card: card // La carte volée pour l'animation
+        card: card, // La carte volée pour l'animation
+        timestamp: Date.now()
       };
 
       // Vérifie si une famille est complétée
@@ -309,7 +310,8 @@ io.on('connection', (socket) => {
         asker: askerName,
         target: targetName,
         family: family.name,
-        member: member.name
+        member: member.name,
+        timestamp: Date.now()
       };
 
       if (game.drawPile.length > 0) {
