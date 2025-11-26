@@ -1,8 +1,9 @@
 .card {
   background: white;
   border-radius: 12px;
-  padding: 15px;
-  min-width: 90px;
+  padding: 12px 10px;
+  min-width: 85px;
+  max-width: 100px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -11,16 +12,9 @@
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-
   float: left;
   margin-right: 10px;
   margin-bottom: 10px;
-}
-
-.card.has-image {
-  padding: 0;
-  min-width: 100px;
-  max-width: 120px;
 }
 
 .card:hover:not(.disabled) {
@@ -37,105 +31,61 @@
 }
 
 .card.small {
-  min-width: 70px;
-  padding: 10px;
+  min-width: 65px;
+  max-width: 75px;
+  padding: 8px 6px;
 }
 
-.card.small.has-image {
-  min-width: 60px;
-  max-width: 80px;
-  padding: 0;
-}
-
-/* Image styles */
-.card-image-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 3/4;
-}
-
-.card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 9px 9px 0 0;
-}
-
-.card-overlay {
+/* Emoji de la famille (métier) en petit en haut */
+.card-family-emoji {
+  font-size: 20px;
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  padding: 8px 4px 4px;
+  top: 4px;
+  right: 6px;
+  opacity: 0.8;
 }
 
-.card-member-small {
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+.card.small .card-family-emoji {
+  font-size: 14px;
+  top: 3px;
+  right: 4px;
 }
 
-/* Emoji fallback styles */
-.card-emoji {
-  font-size: 32px;
-  margin-bottom: 8px;
+/* Emoji du membre (personne) au centre */
+.card-member-emoji {
+  font-size: 36px;
+  margin-bottom: 6px;
+  margin-top: 8px;
 }
 
-.card.small .card-emoji {
-  font-size: 24px;
+.card.small .card-member-emoji {
+  font-size: 26px;
   margin-bottom: 4px;
+  margin-top: 4px;
 }
 
+/* Nom du membre */
 .card-member {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
 }
 
 .card.small .card-member {
-  font-size: 10px;
+  font-size: 9px;
+  margin-bottom: 2px;
 }
 
+/* Nom de la famille */
 .card-family {
   font-size: 10px;
-  color: var(--card-color);
-  font-weight: 500;
-  padding: 4px;
-  background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
-}
-
-.card.has-image .card-family {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--card-color);
   color: white;
-  padding: 6px 4px;
-  border-radius: 0 0 9px 9px;
-  font-size: 9px;
-}
-
-/* Vintage card effect for images */
-.card.has-image::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 248, 220, 0.1) 0%,
-    transparent 50%,
-    rgba(139, 90, 43, 0.05) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: 9px;
+  font-weight: 600;
+  padding: 3px 6px;
+  background: var(--card-color);
+  border-radius: 8px;
+  display: inline-block;
 }
 
 /* Highlight animation for newly drawn cards */

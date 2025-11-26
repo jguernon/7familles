@@ -1,25 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import './CardTransferAnimation.css';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
-
 function CardTransferAnimation({ transfer, onComplete }) {
   const [phase, setPhase] = useState('idle');
-  const [imageUrl, setImageUrl] = useState(null);
   const [positions, setPositions] = useState({ start: null, end: null });
   const cardRef = useRef(null);
-
-  // Charger l'image de la carte
-  useEffect(() => {
-    if (transfer?.card) {
-      if (transfer.card.image) {
-        setImageUrl(transfer.card.image);
-      } else {
-        // Utiliser l'API qui génère les images à la demande
-        setImageUrl(`${SERVER_URL}/api/card-image/${transfer.card.id}`);
-      }
-    }
-  }, [transfer]);
 
   // Calculer les positions et démarrer l'animation
   useEffect(() => {
@@ -85,17 +70,10 @@ function CardTransferAnimation({ transfer, onComplete }) {
         className={`transfer-card ${phase}`}
         style={getCardStyle()}
       >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={transfer.card?.memberName}
-            onError={(e) => e.target.style.display = 'none'}
-          />
-        ) : (
-          <div className="transfer-card-fallback">
-            <span className="emoji">{transfer.card?.memberEmoji}</span>
-          </div>
-        )}
+        <div className="transfer-card-content">
+          <div className="transfer-family-emoji">{transfer.card?.familyEmoji}</div>
+          <div className="transfer-member-emoji">{transfer.card?.memberEmoji}</div>
+        </div>
         <div className="transfer-card-info">
           <span className="member-name">{transfer.card?.memberName}</span>
           <span

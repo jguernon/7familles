@@ -268,6 +268,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       {drawnCard && (
         <DrawPileAnimation
           drawnCard={drawnCard}
+          families={gameState.families}
           onComplete={() => {
             // Highlight la carte dans la main pendant quelques secondes
             setHighlightedCardId(drawnCard.id);

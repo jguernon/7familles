@@ -4,7 +4,6 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs/promises';
 import {
   generateGameCode,
   shuffleDeck,
@@ -13,13 +12,11 @@ import {
   removeCard,
   checkCompletedFamily,
   extractCompletedFamily,
-  isGameOver,
   MEMBERS
 } from './game.js';
 import {
   selectRandomFamilies,
   createSimpleDeck,
-  generateAndAddFamilies,
   getAllFamilies
 } from './familyStorage.js';
 import { config } from './config.js';
@@ -80,47 +77,14 @@ function createGame(hostSocketId, hostName) {
   return game;
 }
 
-// Pré-génère les images pour toutes les cartes d'une liste de familles
-async function preGenerateImages(families, io, gameCode) {
-  const { generateFamilyCards } = await import('./imageGenerator.js');
-
-  for (let i = 0; i < families.length; i++) {
-    const family = families[i];
-
-    // Notifier les joueurs de la progression
-    io.to(gameCode).emit('generatingImages', {
-      familyName: family.name,
-      current: i + 1,
-      total: families.length,
-      message: `Génération des cartes: ${family.name} (${i + 1}/${families.length})`
-    });
-
-    console.log(`Génération images pour ${family.name} (${i + 1}/${families.length})...`);
-
-    // Génère les images pour cette famille (utilise le cache si déjà généré)
-    await generateFamilyCards(family.id, family.name, family.theme, family.color);
-  }
-
-  console.log('Toutes les images ont été pré-générées');
-}
-
 // Démarre une partie
-async function startGame(game, io) {
+async function startGame(game) {
   // Sélectionne 7 familles aléatoires
   const initialFamilyCount = config.game.initialFamilies;
   const selectedFamilies = await selectRandomFamilies(initialFamilyCount);
 
   game.families = selectedFamilies;
   game.totalFamiliesInGame = selectedFamilies.length;
-
-  // Notifier que la préparation commence
-  io.to(game.code).emit('preparingGame', {
-    message: 'Préparation des cartes en cours...',
-    familiesCount: selectedFamilies.length
-  });
-
-  // Pré-générer les images pour toutes les familles sélectionnées
-  await preGenerateImages(selectedFamilies, io, game.code);
 
   // Crée le deck avec ces familles
   const deck = createSimpleDeck(selectedFamilies);
@@ -140,64 +104,6 @@ async function startGame(game, io) {
   game.currentPlayerIndex = 0; // Le premier joueur commence
 
   console.log(`Partie démarrée avec ${selectedFamilies.length} familles: ${selectedFamilies.map(f => f.name).join(', ')}`);
-}
-
-// Ajoute de nouvelles familles à la partie en cours
-async function addNewFamiliesToGame(game, io, count = 3) {
-  if (game.pendingNewFamilies) return; // Évite les ajouts multiples
-  game.pendingNewFamilies = true;
-
-  try {
-    const existingIds = game.families.map(f => f.id);
-    const newFamilies = await generateAndAddFamilies(count);
-
-    // Filtrer les familles vraiment nouvelles
-    const trulyNew = newFamilies.filter(f => !existingIds.includes(f.id));
-
-    if (trulyNew.length === 0) {
-      console.log('Pas de nouvelles familles disponibles');
-      return;
-    }
-
-    // Notifier que de nouvelles familles vont être ajoutées
-    io.to(game.code).emit('addingNewFamilies', {
-      message: 'Nouvelles familles en préparation...',
-      count: trulyNew.length
-    });
-
-    // Pré-générer les images pour les nouvelles familles
-    await preGenerateImages(trulyNew, io, game.code);
-
-    // Ajouter les nouvelles familles à la partie
-    game.families.push(...trulyNew);
-    game.totalFamiliesInGame += trulyNew.length;
-
-    // Créer les nouvelles cartes et les ajouter à la pioche
-    const newCards = createSimpleDeck(trulyNew);
-    const shuffledNew = shuffleDeck(newCards);
-    game.drawPile.push(...shuffledNew);
-
-    // Mélanger la pioche
-    game.drawPile = shuffleDeck(game.drawPile);
-
-    console.log(`${trulyNew.length} nouvelles familles ajoutées: ${trulyNew.map(f => f.name).join(', ')}`);
-    console.log(`Total familles en jeu: ${game.totalFamiliesInGame}, Pioche: ${game.drawPile.length} cartes`);
-
-    return trulyNew;
-  } finally {
-    game.pendingNewFamilies = false;
-  }
-}
-
-// Vérifie si on doit ajouter de nouvelles familles
-function shouldAddNewFamilies(game) {
-  const totalCompleted = Object.values(game.completedFamilies)
-    .reduce((sum, families) => sum + families.length, 0);
-
-  const remainingFamilies = game.totalFamiliesInGame - totalCompleted;
-
-  // Si il reste peu de familles non complétées, on en ajoute
-  return remainingFamilies <= config.game.newFamiliesThreshold;
 }
 
 // Obtient l'état du jeu pour un joueur spécifique (cache les mains des autres)
@@ -315,7 +221,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    await startGame(game, io);
+    await startGame(game);
     console.log(`Partie ${game.code} démarrée avec ${game.players.length} joueurs`);
 
     // Envoie l'état à chaque joueur
@@ -447,14 +353,6 @@ io.on('connection', (socket) => {
     const totalCompleted = Object.values(game.completedFamilies).reduce((sum, families) => sum + families.length, 0);
     game.familiesCompleted = totalCompleted;
 
-    // Vérifie si on doit ajouter de nouvelles familles
-    if (shouldAddNewFamilies(game) && game.drawPile.length > 0) {
-      const newFamilies = await addNewFamiliesToGame(game, io, config.game.newFamiliesToAdd);
-      if (newFamilies && newFamilies.length > 0) {
-        game.lastAction.newFamiliesAdded = newFamilies.map(f => f.name);
-      }
-    }
-
     // Vérifie si la partie est terminée (pioche vide ET plus personne ne peut jouer)
     const allHandsEmpty = Object.values(game.hands).every(hand => hand.length === 0);
     if (game.drawPile.length === 0 && allHandsEmpty) {
@@ -547,142 +445,6 @@ app.get('/api/families', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
-// Route pour générer les images d'une famille
-app.post('/api/generate-images/:familyId', async (req, res) => {
-  try {
-    const { familyId } = req.params;
-    const families = await getAllFamilies();
-    const family = families.find(f => f.id === familyId);
-
-    if (!family) {
-      return res.status(404).json({ success: false, error: 'Famille non trouvée' });
-    }
-
-    const { generateFamilyCards } = await import('./imageGenerator.js');
-    console.log(`Génération des images pour la famille ${family.name}...`);
-
-    const cards = await generateFamilyCards(family.id, family.name, family.theme, family.color);
-
-    res.json({
-      success: true,
-      family: family.name,
-      cardsGenerated: cards.filter(c => c.image !== null).length,
-      cards
-    });
-  } catch (error) {
-    console.error('Erreur génération images:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Route pour générer une seule carte
-app.post('/api/generate-card', async (req, res) => {
-  try {
-    const { familyId, familyName, familyTheme, familyColor, memberId } = req.body;
-
-    if (!familyId || !familyName || !memberId) {
-      return res.status(400).json({ success: false, error: 'Paramètres manquants' });
-    }
-
-    const { generateSingleCard } = await import('./imageGenerator.js');
-    const card = await generateSingleCard(familyId, familyName, familyTheme || familyName, familyColor || '#667eea', memberId);
-
-    if (card && card.image) {
-      res.json({ success: true, card });
-    } else {
-      res.json({ success: false, error: 'Échec de la génération', card });
-    }
-  } catch (error) {
-    console.error('Erreur génération carte:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Cache mémoire pour les images générées (persiste pendant l'exécution)
-const imageCache = new Map();
-
-// Route pour obtenir l'image d'une carte (charge depuis le cache ou génère)
-app.get('/api/card-image/:cardId', async (req, res) => {
-  try {
-    const { cardId } = req.params;
-
-    // 1. Vérifier le cache mémoire
-    if (imageCache.has(cardId)) {
-      const base64 = imageCache.get(cardId);
-      const imageBuffer = Buffer.from(base64, 'base64');
-      res.set('Content-Type', 'image/png');
-      res.set('Cache-Control', 'public, max-age=31536000'); // Cache 1 an
-      return res.send(imageBuffer);
-    }
-
-    // 2. Vérifier le fichier sur disque
-    const imagePath = path.resolve(__dirname, '../data/images', `${cardId}.png`);
-    try {
-      await fs.access(imagePath);
-      const imageBuffer = await fs.readFile(imagePath);
-      // Ajouter au cache mémoire
-      imageCache.set(cardId, imageBuffer.toString('base64'));
-      res.set('Content-Type', 'image/png');
-      res.set('Cache-Control', 'public, max-age=31536000');
-      return res.send(imageBuffer);
-    } catch {
-      // Fichier n'existe pas, continuer
-    }
-
-    // 3. Trouver les infos de la carte dans une partie active
-    let cardInfo = null;
-    for (const [, game] of games) {
-      // Chercher dans le deck
-      const allCards = [...game.drawPile];
-      for (const hand of Object.values(game.hands)) {
-        allCards.push(...hand);
-      }
-      for (const playerFamilies of Object.values(game.completedFamilies)) {
-        for (const family of playerFamilies) {
-          allCards.push(...family.cards);
-        }
-      }
-
-      const card = allCards.find(c => c.id === cardId);
-      if (card) {
-        cardInfo = card;
-        break;
-      }
-    }
-
-    // 4. Si on a les infos, générer l'image
-    if (cardInfo) {
-      const { generateSingleCard } = await import('./imageGenerator.js');
-      const generatedCard = await generateSingleCard(
-        cardInfo.familyId,
-        cardInfo.familyName,
-        cardInfo.familyTheme || cardInfo.familyName,
-        cardInfo.familyColor,
-        cardInfo.memberId
-      );
-
-      if (generatedCard && generatedCard.image) {
-        // Extraire le base64 du data URL
-        const base64 = generatedCard.image.replace(/^data:image\/\w+;base64,/, '');
-        imageCache.set(cardId, base64);
-        const imageBuffer = Buffer.from(base64, 'base64');
-        res.set('Content-Type', 'image/png');
-        res.set('Cache-Control', 'public, max-age=31536000');
-        return res.send(imageBuffer);
-      }
-    }
-
-    // 5. Image non trouvée/non générable
-    res.status(404).json({ success: false, error: 'Image non disponible' });
-  } catch (error) {
-    console.error('Erreur card-image:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Servir les images statiques
-app.use('/images', express.static(path.resolve(__dirname, '../data/images')));
 
 // En production, servir les fichiers statiques du client React
 if (process.env.NODE_ENV === 'production') {
