@@ -1,45 +1,34 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import './CardLostAnimation.css';
 
-// Générer les emojis de pouf
-function generatePoufEmojis() {
-  const emojis = [];
-  const emojiTypes = ['💨', '💨', '💨', '☁️', '☁️', '✨', '💫'];
-  for (let i = 0; i < 12; i++) {
-    const angle = (i / 12) * 360;
-    const distance = 50 + Math.random() * 40;
-    emojis.push({
-      id: i,
-      emoji: emojiTypes[Math.floor(Math.random() * emojiTypes.length)],
-      angle,
-      distance,
-      delay: Math.random() * 0.15,
-      scale: 0.6 + Math.random() * 0.6,
-    });
-  }
-  return emojis;
-}
-
 function CardLostAnimation({ card, onComplete }) {
-  const [phase, setPhase] = useState('active');
-  const poufEmojis = useMemo(() => generatePoufEmojis(), []);
+  const [phase, setPhase] = useState('entering'); // entering, grabbing, leaving
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPhase('done');
-      onComplete();
-    }, 800);
+    // Séquence d'animation
+    const timers = [
+      setTimeout(() => setPhase('grabbing'), 400),
+      setTimeout(() => setPhase('leaving'), 800),
+      setTimeout(() => {
+        onComplete();
+      }, 1400)
+    ];
 
-    return () => clearTimeout(timer);
+    return () => timers.forEach(t => clearTimeout(t));
   }, [onComplete]);
 
-  if (!card || phase === 'done') return null;
+  if (!card) return null;
 
   return (
     <div className="card-lost-overlay">
       <div className="card-lost-container">
-        {/* Carte qui disparaît */}
-        <div className="lost-card shrinking">
+        {/* Main géante qui vient chercher la carte */}
+        <div className={`grabbing-hand ${phase}`}>
+          <span className="hand-emoji">🤚</span>
+        </div>
+
+        {/* Carte qui se fait attraper */}
+        <div className={`lost-card ${phase}`}>
           <div className="lost-card-content">
             <div className="lost-family-emoji">{card.familyEmoji}</div>
             <div className="lost-member-emoji">{card.memberEmoji}</div>
@@ -55,23 +44,13 @@ function CardLostAnimation({ card, onComplete }) {
           </div>
         </div>
 
-        {/* Emojis de pouf qui explosent */}
-        <div className="pouf-emojis">
-          {poufEmojis.map((item) => (
-            <div
-              key={item.id}
-              className="pouf-emoji"
-              style={{
-                '--angle': `${item.angle}deg`,
-                '--distance': `${item.distance}px`,
-                '--delay': `${item.delay}s`,
-                '--scale': item.scale,
-              }}
-            >
-              {item.emoji}
-            </div>
-          ))}
-        </div>
+        {/* Petits effets quand la main attrape */}
+        {phase === 'grabbing' && (
+          <div className="grab-effects">
+            <span className="grab-star">✨</span>
+            <span className="grab-star delayed">💫</span>
+          </div>
+        )}
       </div>
     </div>
   );

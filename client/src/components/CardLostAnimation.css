@@ -9,6 +9,13 @@
   justify-content: center;
   z-index: 3000;
   pointer-events: none;
+  background: rgba(0, 0, 0, 0.3);
+  animation: fadeInOverlay 0.2s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .card-lost-container {
@@ -18,7 +25,66 @@
   justify-content: center;
 }
 
-/* Carte qui disparaît */
+/* Main géante */
+.grabbing-hand {
+  position: absolute;
+  z-index: 10;
+  font-size: 80px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.grabbing-hand.entering {
+  animation: handEnter 0.4s ease-out forwards;
+}
+
+.grabbing-hand.grabbing {
+  animation: handGrab 0.4s ease-in-out forwards;
+}
+
+.grabbing-hand.leaving {
+  animation: handLeave 0.6s ease-in forwards;
+}
+
+@keyframes handEnter {
+  0% {
+    transform: translateX(200px) translateY(-100px) rotate(-30deg) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(60px) translateY(-20px) rotate(-10deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes handGrab {
+  0% {
+    transform: translateX(60px) translateY(-20px) rotate(-10deg) scale(1);
+  }
+  50% {
+    transform: translateX(20px) translateY(0) rotate(0deg) scale(1.1);
+  }
+  100% {
+    transform: translateX(20px) translateY(0) rotate(5deg) scale(1);
+  }
+}
+
+@keyframes handLeave {
+  0% {
+    transform: translateX(20px) translateY(0) rotate(5deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250px) translateY(-150px) rotate(-20deg) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.hand-emoji {
+  display: block;
+  transform: scaleX(-1); /* Miroir pour que la main pointe vers la gauche */
+}
+
+/* Carte qui se fait voler */
 .lost-card {
   width: 120px;
   height: 170px;
@@ -28,23 +94,51 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease;
 }
 
-.lost-card.shrinking {
-  animation: cardShrinkPoof 0.6s ease-in forwards;
+.lost-card.entering {
+  animation: cardAppear 0.3s ease-out forwards;
 }
 
-@keyframes cardShrinkPoof {
+.lost-card.grabbing {
+  animation: cardShake 0.4s ease-in-out forwards;
+}
+
+.lost-card.leaving {
+  animation: cardStolen 0.6s ease-in forwards;
+}
+
+@keyframes cardAppear {
   0% {
-    transform: scale(1) rotate(0deg);
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
     opacity: 1;
   }
-  30% {
-    transform: scale(1.1) rotate(-5deg);
+}
+
+@keyframes cardShake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes cardStolen {
+  0% {
+    transform: rotate(0deg) scale(1);
     opacity: 1;
   }
   100% {
-    transform: scale(0) rotate(15deg);
+    transform: translateX(200px) translateY(-120px) rotate(15deg) scale(0.5);
     opacity: 0;
   }
 }
@@ -92,8 +186,8 @@
   border-radius: 8px;
 }
 
-/* Emojis de pouf */
-.pouf-emojis {
+/* Effets quand la main attrape */
+.grab-effects {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -101,106 +195,38 @@
   pointer-events: none;
 }
 
-.pouf-emoji {
+.grab-star {
   position: absolute;
-  font-size: calc(24px * var(--scale));
-  animation: poufExplode 0.7s ease-out forwards;
-  animation-delay: var(--delay);
-  opacity: 0;
+  font-size: 30px;
+  animation: starPop 0.5s ease-out forwards;
 }
 
-@keyframes poufExplode {
+.grab-star:nth-child(1) {
+  top: -40px;
+  left: -30px;
+}
+
+.grab-star:nth-child(2) {
+  top: -20px;
+  right: -40px;
+  animation-delay: 0.1s;
+}
+
+.grab-star.delayed {
+  animation-delay: 0.15s;
+}
+
+@keyframes starPop {
   0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-  }
-  20% {
+    transform: scale(0);
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
   }
   100% {
-    transform:
-      translate(-50%, -50%)
-      translateX(calc(cos(var(--angle)) * var(--distance)))
-      translateY(calc(sin(var(--angle)) * var(--distance)))
-      scale(0.5);
+    transform: scale(0.8) translateY(-20px);
     opacity: 0;
-  }
-}
-
-/* Fallback pour navigateurs sans cos/sin CSS */
-@supports not (transform: translateX(calc(cos(45deg) * 10px))) {
-  .pouf-emoji:nth-child(1) { animation: poufFallback1 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(2) { animation: poufFallback2 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(3) { animation: poufFallback3 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(4) { animation: poufFallback4 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(5) { animation: poufFallback5 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(6) { animation: poufFallback6 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(7) { animation: poufFallback7 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(8) { animation: poufFallback8 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(9) { animation: poufFallback9 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(10) { animation: poufFallback10 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(11) { animation: poufFallback11 0.7s ease-out forwards; }
-  .pouf-emoji:nth-child(12) { animation: poufFallback12 0.7s ease-out forwards; }
-
-  @keyframes poufFallback1 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(50px, 0) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback2 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(35px, 35px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback3 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(0, 50px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback4 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(-35px, 35px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback5 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(-50px, 0) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback6 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(-35px, -35px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback7 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(0, -50px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback8 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(35px, -35px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback9 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(45px, 20px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback10 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(-45px, 20px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback11 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(45px, -20px) scale(0.5); opacity: 0; }
-  }
-  @keyframes poufFallback12 {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(-45px, -20px) scale(0.5); opacity: 0; }
   }
 }
