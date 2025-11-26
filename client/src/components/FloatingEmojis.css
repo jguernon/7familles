@@ -1,0 +1,84 @@
+.floating-emojis-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-emoji {
+  position: absolute;
+  bottom: -60px;
+  animation: floatUp linear infinite;
+  will-change: transform;
+  filter: blur(3px);
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--opacity, 0.2);
+  }
+  90% {
+    opacity: var(--opacity, 0.2);
+  }
+  100% {
+    transform: translateY(-110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Variation des mouvements latéraux */
+.floating-emoji:nth-child(odd) {
+  animation-name: floatUpLeft;
+}
+
+.floating-emoji:nth-child(even) {
+  animation-name: floatUpRight;
+}
+
+@keyframes floatUpLeft {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--opacity, 0.2);
+  }
+  50% {
+    transform: translateY(-55vh) translateX(-30px) rotate(180deg);
+  }
+  90% {
+    opacity: var(--opacity, 0.2);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUpRight {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--opacity, 0.2);
+  }
+  50% {
+    transform: translateY(-55vh) translateX(30px) rotate(-180deg);
+  }
+  90% {
+    opacity: var(--opacity, 0.2);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(0) rotate(-360deg);
+    opacity: 0;
+  }
+}

@@ -5,6 +5,7 @@ import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
 import GameOver from './components/GameOver';
 import PreparingGame from './components/PreparingGame';
+import FloatingEmojis from './components/FloatingEmojis';
 import './App.css';
 
 function App() {
@@ -149,6 +150,8 @@ function App() {
 
   return (
     <div className="app">
+      <FloatingEmojis />
+
       {screen === 'home' && (
         <HomeScreen
           onCreateGame={handleCreateGame}
