@@ -1,10 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './HomeScreen.css';
 
 function HomeScreen({ onCreateGame, onJoinGame, error, setError }) {
   const [mode, setMode] = useState(null); // null, 'create', 'join'
   const [name, setName] = useState('');
   const [gameCode, setGameCode] = useState('');
+
+  // Lire le code de partie depuis l'URL au chargement
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const codeFromUrl = params.get('code');
+    if (codeFromUrl) {
+      setGameCode(codeFromUrl.toUpperCase());
+      setMode('join');
+      // Nettoyer l'URL sans recharger la page
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

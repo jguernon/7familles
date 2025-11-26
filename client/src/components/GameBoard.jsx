@@ -189,6 +189,38 @@ function GameBoard({ gameState, playerName, onAskCard }) {
     return acc;
   }, {});
 
+  // Partager le lien de la partie
+  const handleShareGame = async () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
+    const shareData = {
+      title: 'Jeu des 7 Familles',
+      text: `Rejoins ma partie des 7 Familles ! Code: ${gameState.code}`,
+      url: shareUrl
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copier le lien dans le presse-papier
+        await navigator.clipboard.writeText(shareUrl);
+        setActionFeedback('Lien copié !');
+        setTimeout(() => setActionFeedback(null), 2000);
+      }
+    } catch (err) {
+      // L'utilisateur a annulé le partage ou erreur
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          setActionFeedback('Lien copié !');
+          setTimeout(() => setActionFeedback(null), 2000);
+        } catch {
+          console.error('Erreur de partage:', err);
+        }
+      }
+    }
+  };
+
   return (
     <div className="game-board">
       {/* Header avec infos de partie */}
@@ -196,7 +228,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
         <div className="game-info">
           <span className="draw-pile">Pige: {gameState.drawPileCount}</span>
           <span className="families-count">Familles: {gameState.families?.length || 0}</span>
-          <span className="game-code">#{gameState.code}</span>
+          <span className="game-code" onClick={handleShareGame}>#{gameState.code}</span>
         </div>
       </header>
 
