@@ -1,0 +1,206 @@
+.card-lost-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  pointer-events: none;
+}
+
+.card-lost-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Carte qui disparaît */
+.lost-card {
+  width: 120px;
+  height: 170px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.lost-card.shrinking {
+  animation: cardShrinkPoof 0.6s ease-in forwards;
+}
+
+@keyframes cardShrinkPoof {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1.1) rotate(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+.lost-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  position: relative;
+}
+
+.lost-family-emoji {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+.lost-member-emoji {
+  font-size: 50px;
+}
+
+.lost-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  gap: 4px;
+}
+
+.lost-member-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.lost-family-name {
+  font-size: 10px;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+/* Emojis de pouf */
+.pouf-emojis {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.pouf-emoji {
+  position: absolute;
+  font-size: calc(24px * var(--scale));
+  animation: poufExplode 0.7s ease-out forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+}
+
+@keyframes poufExplode {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform:
+      translate(-50%, -50%)
+      translateX(calc(cos(var(--angle)) * var(--distance)))
+      translateY(calc(sin(var(--angle)) * var(--distance)))
+      scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Fallback pour navigateurs sans cos/sin CSS */
+@supports not (transform: translateX(calc(cos(45deg) * 10px))) {
+  .pouf-emoji:nth-child(1) { animation: poufFallback1 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(2) { animation: poufFallback2 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(3) { animation: poufFallback3 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(4) { animation: poufFallback4 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(5) { animation: poufFallback5 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(6) { animation: poufFallback6 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(7) { animation: poufFallback7 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(8) { animation: poufFallback8 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(9) { animation: poufFallback9 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(10) { animation: poufFallback10 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(11) { animation: poufFallback11 0.7s ease-out forwards; }
+  .pouf-emoji:nth-child(12) { animation: poufFallback12 0.7s ease-out forwards; }
+
+  @keyframes poufFallback1 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(50px, 0) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback2 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(35px, 35px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback3 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(0, 50px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback4 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-35px, 35px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback5 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-50px, 0) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback6 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-35px, -35px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback7 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(0, -50px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback8 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(35px, -35px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback9 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(45px, 20px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback10 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-45px, 20px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback11 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(45px, -20px) scale(0.5); opacity: 0; }
+  }
+  @keyframes poufFallback12 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-45px, -20px) scale(0.5); opacity: 0; }
+  }
+}

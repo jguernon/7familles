@@ -5,6 +5,7 @@ import AskCardModal from './AskCardModal';
 import DrawPileAnimation from './DrawPileAnimation';
 import CardTransferAnimation from './CardTransferAnimation';
 import FamilyCompleteAnimation from './FamilyCompleteAnimation';
+import CardLostAnimation from './CardLostAnimation';
 import useSounds from '../hooks/useSounds';
 import './GameBoard.css';
 
@@ -16,6 +17,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
   const [highlightedCardId, setHighlightedCardId] = useState(null);
   const [cardTransfer, setCardTransfer] = useState(null);
   const [familyComplete, setFamilyComplete] = useState(null);
+  const [lostCard, setLostCard] = useState(null);
 
   const sounds = useSounds();
   const prevCompletedFamiliesRef = useRef(gameState.completedFamilies);
@@ -74,9 +76,10 @@ function GameBoard({ gameState, playerName, onAskCard }) {
           message += ` Famille ${action.familyCompleted} complétée!`;
         }
 
-        // Son stolen si on se fait voler une carte
-        if (action.targetId === myId) {
+        // Animation et son si on se fait voler une carte
+        if (action.targetId === myId && action.card) {
           sounds.playStolen();
+          setLostCard(action.card);
         }
 
         // Animation de transfert pour les autres joueurs (pas celui qui a fait l'action)
@@ -409,6 +412,14 @@ function GameBoard({ gameState, playerName, onAskCard }) {
           familyName={familyComplete.familyName}
           familyColor={familyComplete.familyColor}
           onComplete={() => setFamilyComplete(null)}
+        />
+      )}
+
+      {/* Animation de carte perdue (volée) */}
+      {lostCard && (
+        <CardLostAnimation
+          card={lostCard}
+          onComplete={() => setLostCard(null)}
         />
       )}
 
