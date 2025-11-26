@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import './CardTransferAnimation.css';
 
 // Générer les nuages d'explosion
@@ -24,10 +24,15 @@ function CardTransferAnimation({ transfer, onComplete }) {
   const [positions, setPositions] = useState({ start: null, end: null });
   const cardRef = useRef(null);
   const clouds = useMemo(() => generateClouds(), []);
+  const hasStartedRef = useRef(false);
+
+  // Stabiliser onComplete pour éviter les re-triggers
+  const stableOnComplete = useCallback(onComplete, []);
 
   // Calculer les positions et démarrer l'animation
   useEffect(() => {
-    if (!transfer) return;
+    if (!transfer || hasStartedRef.current) return;
+    hasStartedRef.current = true;
 
     // Trouver les éléments DOM pour les positions
     const fromElement = document.querySelector(`[data-player-id="${transfer.fromPlayerId}"]`);
@@ -38,10 +43,6 @@ function CardTransferAnimation({ transfer, onComplete }) {
     if (fromElement && toElement) {
       const fromRect = fromElement.getBoundingClientRect();
       const toRect = toElement.getBoundingClientRect();
-
-      // Calculer les positions au centre de l'écran pour éviter les bugs de scroll
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
 
       setPositions({
         start: {
@@ -63,16 +64,16 @@ function CardTransferAnimation({ transfer, onComplete }) {
         setTimeout(() => setPhase('landing'), 1700),
         setTimeout(() => {
           setPhase('done');
-          onComplete();
+          stableOnComplete();
         }, 2300)
       ];
 
       return () => timers.forEach(t => clearTimeout(t));
     } else {
       // Si on ne trouve pas les éléments, terminer immédiatement
-      onComplete();
+      stableOnComplete();
     }
-  }, [transfer, onComplete]);
+  }, [transfer, stableOnComplete]);
 
   if (!transfer || phase === 'idle' || !positions.start) return null;
 
