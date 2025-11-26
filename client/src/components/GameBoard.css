@@ -109,6 +109,41 @@
   }
 }
 
+/* Animation des points d'attente */
+.waiting-dots {
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+.waiting-dots .dot {
+  animation: dotBounce 1.4s infinite ease-in-out both;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.waiting-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.waiting-dots .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.waiting-dots .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
 /* Notifications */
 .notification {
   position: fixed;
@@ -363,6 +398,43 @@
   text-align: center;
   color: #999;
   padding: 40px;
+}
+
+/* Bouton pour demander une autre famille */
+.ask-any-family-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.ask-any-family-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.ask-any-family-btn:active {
+  transform: scale(0.98);
+}
+
+.ask-any-icon {
+  font-size: 24px;
+}
+
+.ask-any-text {
+  font-size: 15px;
 }
 
 @media (max-width: 480px) {

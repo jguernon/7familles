@@ -110,17 +110,26 @@ function GameBoard({ gameState, playerName, onAskCard }) {
     setSelectedFamily({
       familyId,
       familyName: familyCards[0].familyName,
-      familyColor: familyCards[0].familyColor
+      familyColor: familyCards[0].familyColor,
+      familyEmoji: familyCards[0].familyEmoji
     });
     setShowAskModal(true);
   };
 
-  const handleAskCard = (targetPlayerId, memberId) => {
-    if (!selectedFamily) return;
+  // Ouvrir le modal pour demander N'IMPORTE quelle famille
+  const handleAskAnyFamily = () => {
+    if (!isMyTurn) return;
+    setSelectedFamily(null); // null = choisir famille d'abord
+    setShowAskModal(true);
+  };
+
+  const handleAskCard = (targetPlayerId, memberId, familyId) => {
+    const familyToUse = familyId || selectedFamily?.familyId;
+    if (!familyToUse) return;
 
     setActionFeedback('Demande en cours...');
 
-    onAskCard(targetPlayerId, selectedFamily.familyId, memberId, (response) => {
+    onAskCard(targetPlayerId, familyToUse, memberId, (response) => {
       setShowAskModal(false);
       setSelectedFamily(null);
 
@@ -290,13 +299,25 @@ function GameBoard({ gameState, playerName, onAskCard }) {
           {gameState.myHand.length === 0 && (
             <p className="no-cards">Vous n'avez plus de cartes</p>
           )}
+
+          {/* Bouton pour demander une autre famille */}
+          {isMyTurn && (
+            <button
+              className="ask-any-family-btn"
+              onClick={handleAskAnyFamily}
+            >
+              <span className="ask-any-icon">🎴</span>
+              <span className="ask-any-text">Demander une autre famille</span>
+            </button>
+          )}
         </div>
       </section>
 
       {/* Modal pour demander une carte */}
-      {showAskModal && selectedFamily && (
+      {showAskModal && (
         <AskCardModal
           selectedFamily={selectedFamily}
+          allFamilies={gameState.families}
           players={gameState.players.filter(p => p.id !== myId && !p.disconnected)}
           members={gameState.members}
           myHand={gameState.myHand}
@@ -350,7 +371,18 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       {/* Barre de tour fixe en bas */}
       <div className={`turn-bar ${isMyTurn ? 'my-turn' : ''}`}>
         <div className="turn-bar-content">
-          {isMyTurn ? 'Votre tour!' : `Tour de ${currentPlayer?.name || '...'}`}
+          {isMyTurn ? (
+            'Votre tour!'
+          ) : (
+            <>
+              Tour de {currentPlayer?.name || '...'}
+              <span className="waiting-dots">
+                <span className="dot">.</span>
+                <span className="dot">.</span>
+                <span className="dot">.</span>
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

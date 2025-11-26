@@ -49,12 +49,18 @@
 }
 
 .selected-family {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 20px;
   border-radius: 20px;
   color: white;
   font-weight: 600;
   font-size: 16px;
+}
+
+.selected-family-emoji {
+  font-size: 20px;
 }
 
 .modal-step {
@@ -159,6 +165,61 @@
   text-align: center;
   color: #999;
   padding: 30px;
+}
+
+/* Choix des familles */
+.family-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.family-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 10px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 3px solid transparent;
+  position: relative;
+}
+
+.family-choice:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.family-choice.owned {
+  border-color: var(--family-color);
+  background: linear-gradient(135deg, rgba(var(--family-color), 0.1) 0%, rgba(var(--family-color), 0.05) 100%);
+}
+
+.family-choice-emoji {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.family-choice-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.family-choice-count {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--family-color);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 8px;
 }
 
 /* Actions */

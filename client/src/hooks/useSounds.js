@@ -147,18 +147,21 @@ export function useSounds() {
 
   const startWaiting = useCallback(() => {
     if (!soundsUnlocked) return;
-    // Jouer un petit son toutes les 2 secondes
+    // Tic-tac d'horloge doux toutes les 1.5 secondes
     if (waitingIntervalRef.current) {
       clearInterval(waitingIntervalRef.current);
     }
-    const playTick = () => {
+    let isTick = true;
+    const playTickTock = () => {
       try {
         const ctx = getContext();
-        createSound(ctx, 'sine', 220, 0.05, 0.1);
+        // Son très doux et court - comme un tic-tac d'horloge
+        const freq = isTick ? 800 : 600; // Tic aigu, tac grave
+        createSound(ctx, 'sine', freq, 0.02, 0.04); // Très court et très doux
+        isTick = !isTick;
       } catch (e) {}
     };
-    playTick();
-    waitingIntervalRef.current = setInterval(playTick, 2000);
+    waitingIntervalRef.current = setInterval(playTickTock, 1500);
   }, [getContext]);
 
   const stopWaiting = useCallback(() => {
