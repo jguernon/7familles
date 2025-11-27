@@ -1,21 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './CardLostAnimation.css';
 
 function CardLostAnimation({ card, onComplete }) {
   const [phase, setPhase] = useState('entering'); // entering, grabbing, leaving
+  const hasStartedRef = useRef(false);
+  const stableOnComplete = useCallback(onComplete, []);
 
   useEffect(() => {
+    // Éviter de relancer l'animation si elle a déjà commencé
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     // Séquence d'animation
     const timers = [
       setTimeout(() => setPhase('grabbing'), 400),
       setTimeout(() => setPhase('leaving'), 800),
       setTimeout(() => {
-        onComplete();
+        stableOnComplete();
       }, 1400)
     ];
 
     return () => timers.forEach(t => clearTimeout(t));
-  }, [onComplete]);
+  }, [stableOnComplete]);
 
   if (!card) return null;
 

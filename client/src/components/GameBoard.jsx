@@ -27,6 +27,9 @@ function GameBoard({ gameState, playerName, onAskCard }) {
   const isMyTurn = gameState.isMyTurn;
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
 
+  // Callbacks stables pour les animations
+  const handleLostCardComplete = useCallback(() => setLostCard(null), []);
+
   // Gérer le son d'attente quand ce n'est pas notre tour
   useEffect(() => {
     if (!isMyTurn) {
@@ -82,13 +85,13 @@ function GameBoard({ gameState, playerName, onAskCard }) {
           setLostCard(action.card);
         }
 
-        // Animation de transfert pour les autres joueurs (pas celui qui a fait l'action)
-        if (action.askerId !== myId && action.card) {
+        // Animation de transfert pour les autres joueurs (pas celui qui a fait l'action, ni la cible)
+        if (action.askerId !== myId && action.targetId !== myId && action.card) {
           setCardTransfer({
             card: action.card,
             fromPlayerId: action.targetId,
             toPlayerId: action.askerId,
-            toHand: action.askerId === myId
+            toHand: false // jamais vers notre main car on n'est ni l'asker ni la target
           });
         }
       } else if (action.type === 'fail') {
@@ -419,7 +422,7 @@ function GameBoard({ gameState, playerName, onAskCard }) {
       {lostCard && (
         <CardLostAnimation
           card={lostCard}
-          onComplete={() => setLostCard(null)}
+          onComplete={handleLostCardComplete}
         />
       )}
 
